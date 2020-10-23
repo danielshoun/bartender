@@ -9,6 +9,7 @@ import makeStyles from "@material-ui/core/styles/makeStyles";
 import PeopleDisplay from "./PeopleDisplay";
 import OrgSettings from "./OrgSettings";
 import VotingDisplay from "./VotingDisplay";
+import EventDisplay from "./EventDisplay";
 
 const axios = require('axios')
 
@@ -114,7 +115,7 @@ export default function OrganizationMain(props) {
                             <PeopleDisplay selfRole = {selfRole}/>
                         </Route>
                         <Route exact path="/app/organization/:orgId/events">
-
+                            <EventDisplay selfRole = {selfRole}/>
                         </Route>
                         <Route exact path="/app/organization/:orgId/sign-in">
 

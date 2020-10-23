@@ -19,12 +19,17 @@ import Search from "@material-ui/icons/Search";
 import ArrowDownward from "@material-ui/icons/ArrowDownward";
 import Remove from "@material-ui/icons/Remove";
 import ViewColumn from "@material-ui/icons/ViewColumn";
+import Box from "@material-ui/core/Box";
 
 const axios = require('axios')
 
 const useStyles = makeStyles(theme => ({
     peoplePaper: {
         marginTop: theme.spacing(2)
+    },
+    unapprovedContainer: {
+        marginTop: theme.spacing(2),
+        marginBottom: theme.spacing(2)
     }
 }))
 
@@ -116,9 +121,6 @@ export default function PeopleDisplay(props) {
     }
 
     else {
-        console.log(eventCategories.map((category) => (
-            {title: category.name,
-                field: category.name.toLowerCase()})))
         return (
             <>
                 <Typography variant={"h6"}>People</Typography>
@@ -131,10 +133,9 @@ export default function PeopleDisplay(props) {
                         columns={eventCategories.length > 0 ? [
                             {title: "Name", field: "name"},
                             {title: "Bar", field: "score"}
-                        ].concat(eventCategories.map((category) => (
-                            {title: category.name,
-                            field: category.name}
-                        ))) : [{title: "Name", field: "name"}]}
+                        ].concat(eventCategories.map((category) => {
+                            return category.requiredFor.length === 0 ? {title: category.name, field: category.name} : null
+                        }).filter(function(val) {return val !== null})) : [{title: "Name", field: "name"}]}
                         data={userBarDetails.map((barDetails) => {
                             let data = {
                                 name: barDetails.user.firstName + " " + barDetails.user.lastName,
@@ -159,30 +160,33 @@ export default function PeopleDisplay(props) {
                         })}/>
                 </Paper>
                 {props.selfRole.permissions.includes("SUPERADMIN") || props.selfRole.permissions.includes("canManageUsers")?
-                <>
+                <Box className={classes.unapprovedContainer}>
                     <Typography variant={"h6"}>Unapproved Users</Typography>
-                    <Paper className={classes.peoplePaper}>
-                        {unapprovedUsers.length < 1 || unapprovedUsers === null ?
+
+                        {unapprovedUsers.length < 1 ?
                         <>
                             <Typography>No unapproved users to show.</Typography>
                         </> :
-                        <MaterialTable
-                            icons={tableIcons}
-                            options={{
-                                showTitle: false
-                            }}
-                            columns={[{title: "Name", field: "name"}, {title:"Approve/Deny", field: "approvedeny"}]}
-                            data={unapprovedUsers.map((user) => {
-                                return {
-                                    name: user.firstName + " " + user.lastName,
-                                    approvedeny: <><Check onClick={(event) => {
-                                        handleApprove(user.id)
-                                    }}/><DeleteOutline/></>
-                                }
-                            })}/>}
+                        <>
+                            <Paper className={classes.peoplePaper}>
+                                <MaterialTable
+                                    icons={tableIcons}
+                                    options={{
+                                        showTitle: false
+                                    }}
+                                    columns={[{title: "Name", field: "name"}, {title:"Actions", field: "actions"}]}
+                                    data={unapprovedUsers.map((user) => {
+                                        return {
+                                            name: user.firstName + " " + user.lastName,
+                                            actions: <><Check onClick={(event) => {
+                                                handleApprove(user.id)
+                                            }}/><DeleteOutline/></>
+                                        }
+                                    })}/>
+                                </Paper>
+                        </>}
 
-                    </Paper>
-                </>: <></>}
+                </Box>: <></>}
             </>
         )
     }

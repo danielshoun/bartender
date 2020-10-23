@@ -138,6 +138,27 @@ export default function OrgSettings() {
                         })}/>
                     <Button variant="contained" color="primary"
                             onClick={(event) => setShowingAddCategoryDialog(true)}>Add Category</Button>
+                    <br/><i>Roles</i>
+                    <MaterialTable
+                        components={{Container: props => props.children}}
+                        options={{
+                            search: false,
+                            paging: false,
+                            showTitle: false,
+                            toolbar: false
+                        }}
+                        columns={[
+                            {title: "Role", field: "name"},
+                            {title: "Permissions", field: "permissions"},
+                            {title: "Actions", field: "actions"}
+                        ]}
+                        data={eventCategories === null ? [{}] : roles.map(role => {
+                            return {
+                                name: role.name,
+                                permissions: role.permissions.join(", "),
+                                actions: ""
+                            }
+                        })}/>
                 </Paper>
             </Box>
             <Dialog open={showingAddCategoryDialog} onClose={(event) => {

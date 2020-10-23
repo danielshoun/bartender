@@ -71,7 +71,7 @@ export default function RegDialog() {
             axios.post("/api/v1/user/register", body).then(resp => {
                 setShowingSuccessDialog(true)
             }).catch(resp => {
-                setErrorDialogText(resp)
+                setErrorDialogText(resp.data)
                 setShowingErrorDialog(true)
             })
         }
