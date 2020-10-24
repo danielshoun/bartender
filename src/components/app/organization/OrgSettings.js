@@ -1,215 +1,311 @@
-import React, {useEffect, useState} from 'react';
-import {useParams} from 'react-router-dom';
+import React, {forwardRef, useEffect, useState} from 'react';
+import makeStyles from "@material-ui/core/styles/makeStyles";
+import AddBox from "@material-ui/icons/AddBox";
+import Check from "@material-ui/icons/Check";
+import Clear from "@material-ui/icons/Clear";
+import DeleteOutline from "@material-ui/icons/DeleteOutline";
+import ChevronRight from "@material-ui/icons/ChevronRight";
+import Edit from "@material-ui/icons/Edit";
+import SaveAlt from "@material-ui/icons/SaveAlt";
+import FilterList from "@material-ui/icons/FilterList";
+import FirstPage from "@material-ui/icons/FirstPage";
+import LastPage from "@material-ui/icons/LastPage";
+import ChevronLeft from "@material-ui/icons/ChevronLeft";
+import Search from "@material-ui/icons/Search";
+import ArrowDownward from "@material-ui/icons/ArrowDownward";
+import Remove from "@material-ui/icons/Remove";
+import ViewColumn from "@material-ui/icons/ViewColumn";
+import {useParams} from "react-router-dom";
 import Typography from "@material-ui/core/Typography";
-import Box from "@material-ui/core/Box"
-import Paper from "@material-ui/core/Paper"
+import Paper from "@material-ui/core/Paper";
+import MaterialTable from "material-table";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
-import DialogActions from "@material-ui/core/DialogActions";
+import DialogContentText from "@material-ui/core/DialogContentText";
 import TextField from "@material-ui/core/TextField";
+import DialogActions from "@material-ui/core/DialogActions";
 import Checkbox from "@material-ui/core/Checkbox";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
-import makeStyles from "@material-ui/core/styles/makeStyles";
-import MaterialTable from "material-table";
+import Radio from "@material-ui/core/Radio";
+import RadioGroup from "@material-ui/core/RadioGroup";
 
 const axios = require('axios')
 
 const useStyles = makeStyles(theme => ({
-    settingsContainer: {
-        display:"flex",
-        marginTop: theme.spacing(2),
-        justifyContent: "center"
-    },
-    settingsPaper: {
-        width:"60%",
-        padding: theme.spacing(3)
+    peoplePaper: {
+        marginTop: theme.spacing(2)
     }
 }))
 
-export default function OrgSettings() {
+const tableIcons = {
+    Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
+    Check: forwardRef((props, ref) => <Check {...props} ref={ref} />),
+    Clear: forwardRef((props, ref) => <Clear {...props} ref={ref} />),
+    Delete: forwardRef((props, ref) => <DeleteOutline {...props} ref={ref} />),
+    DetailPanel: forwardRef((props, ref) => <ChevronRight {...props} ref={ref} />),
+    Edit: forwardRef((props, ref) => <Edit {...props} ref={ref} />),
+    Export: forwardRef((props, ref) => <SaveAlt {...props} ref={ref} />),
+    Filter: forwardRef((props, ref) => <FilterList {...props} ref={ref} />),
+    FirstPage: forwardRef((props, ref) => <FirstPage {...props} ref={ref} />),
+    LastPage: forwardRef((props, ref) => <LastPage {...props} ref={ref} />),
+    NextPage: forwardRef((props, ref) => <ChevronRight {...props} ref={ref} />),
+    PreviousPage: forwardRef((props, ref) => <ChevronLeft {...props} ref={ref} />),
+    ResetSearch: forwardRef((props, ref) => <Clear {...props} ref={ref} />),
+    Search: forwardRef((props, ref) => <Search {...props} ref={ref} />),
+    SortArrow: forwardRef((props, ref) => <ArrowDownward {...props} ref={ref} />),
+    ThirdStateCheck: forwardRef((props, ref) => <Remove {...props} ref={ref} />),
+    ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />)
+};
+
+
+export default function OrgSettings(props) {
     const classes = useStyles()
     const {orgId} = useParams()
 
-    const [eventCategories, setEventCategories] = useState(null)
-    const [roles, setRoles] = useState([])
-    const [showingAddCategoryDialog, setShowingAddCategoryDialog] = useState(false)
-    const [addCategoryName, setAddCategoryName] = useState("")
-    const [addCategoryPenalty, setAddCategoryPenalty] = useState(0)
-    const [addRequiredForChecked, setAddRequiredForChecked] = useState([])
+    const[categories, setCategories] = useState(null)
+    const[roles, setRoles] = useState(null)
+    const[showingNewCategoryDialog, setShowingNewCategoryDialog] = useState(false)
+    const[newCategoryName, setNewCategoryName] = useState("")
+    const[newCategoryPenalty, setNewCategoryPenalty] = useState(0)
+    const[newCategoryRequiredForAll, setNewCategoryRequiredForAll] = useState(false)
+    const[newCategoryRequiredForChecked, setNewCategoryRequiredForChecked] = useState([])
+    const[showingNewRoleDialog, setShowingNewRoleDialog] = useState(false)
+    const[newRoleName, setNewRoleName] = useState("")
+    const[newRolePermissionsChecked, setNewRolePermissionsChecked] = useState([
+        {permission: "canManageEvents", label: "Manage Events", checked: false}
+        ])
 
     useEffect(() => {
         axios.get("/api/v1/organization/" + orgId + "/categories").then(resp => {
             console.log(resp)
-            setEventCategories(resp.data)
+            setCategories(resp.data)
         }).catch(resp => {
             console.log(resp)
-        })
-        axios.get("/api/v1/organization/" + orgId + "/roles").then(resp => {
-            console.log(resp)
-            setRoles(resp.data)
-
-        }).catch(resp => {
-            console.log(resp)
+            setCategories([])
         })
     }, [orgId])
 
     useEffect(() => {
-        setAddRequiredForChecked(roles.map((role) => (
-            {role: role, checked: false}
-        )))
-    }, [roles])
+        axios.get("/api/v1/organization/" + orgId + "/roles").then(resp => {
+            console.log(resp)
+            setRoles(resp.data)
+        }).catch(resp => {
+            console.log(resp)
+            setRoles([])
+        })
+    }, [orgId])
+
+    const handleOpenNewCategoryDialog = () => {
+        let newCatArray = []
+        roles.forEach((role) => {
+            role.checked = false
+            newCatArray.push(role)
+        })
+        setNewCategoryRequiredForChecked(newCatArray)
+        setShowingNewCategoryDialog(true)
+    }
+
+    const handleCloseNewCategoryDialog = () => {
+        setNewCategoryRequiredForChecked([])
+        setNewCategoryName("")
+        setNewCategoryPenalty(0)
+        setNewCategoryRequiredForAll(false)
+        setShowingNewCategoryDialog(false)
+    }
 
     const isCheckedForRole = (role) => {
-        console.log("Add Required for Checked:")
-        console.log(addRequiredForChecked)
-        return addRequiredForChecked.filter(arrRole => arrRole.role === role).checked
+        return newCategoryRequiredForChecked.find(arrRole => arrRole === role).checked
     }
 
-    const handleRequiredForCheck = (role) => {
-        console.log("Add Required for Checked:")
-        console.log(addRequiredForChecked)
-        addRequiredForChecked.find(arrRole => arrRole.role === role)
-            .checked = !addRequiredForChecked.find(arrRole => arrRole.role === role).checked
+    const handleRoleCheck = (role) => {
+        let newCatArray = newCategoryRequiredForChecked.slice()
+        newCatArray.find(arrRole => arrRole === role)
+            .checked = !newCategoryRequiredForChecked.find(arrRole => arrRole === role).checked
+        setNewCategoryRequiredForChecked(newCatArray)
     }
 
-    const handleAddCategory = () => {
-        let badForm = false
-
-        let requiredRoleIds = []
-        addRequiredForChecked.forEach(obj => {
-            if (obj.checked) {
-                requiredRoleIds.push(obj.role.id)
-            }
+    const handleAddEventCategory = () => {
+        let requiredFor = newCategoryRequiredForChecked.filter(role => {return role.checked})
+        let requiredForIds = []
+        requiredFor.forEach(role => {
+            requiredForIds.push(role.id)
         })
         const body = {
-            name: addCategoryName,
-            penalty: addCategoryPenalty,
-            requiredRoleIds: requiredRoleIds
+            name: newCategoryName,
+            penalty: newCategoryPenalty,
+            requiredForAll: newCategoryRequiredForAll,
+            requiredRoleIds: requiredForIds
         }
-        Object.values(body).forEach((val) => {
-            if (val === "") {
-                badForm = true
-            }
-        })
-        if (badForm) {
-            alert("You must fill in every field.")
-        }
-        axios.post("/api/v1/organization/"+ orgId + "/categories/add", body).then(resp => {
+        axios.post("/api/v1/organization/" + orgId + "/categories/add", body).then(resp => {
             console.log(resp)
-            axios.get("/api/v1/organization/" + orgId + "/categories").then(resp => {
-                console.log(resp)
-                setEventCategories(resp.data)
-            }).catch(resp => {
-                console.log(resp)
-            })
-            setShowingAddCategoryDialog(false)
         }).catch(resp => {
             console.log(resp)
         })
     }
 
-    return (
-        <>
-            <Typography variant={"h6"}>Organization Settings</Typography>
-            <Box className={classes.settingsContainer}>
-                <Paper className={classes.settingsPaper}>
-                    <i>Event Categories</i>
-                    <MaterialTable
-                        components={{Container: props => props.children}}
-                        options={{
-                            search: false,
-                            paging: false,
-                            showTitle: false,
-                            toolbar: false
-                        }}
-                        columns={[
-                            {title: "Category", field: "name"},
-                            {title: "Penalty", field: "penalty"},
-                            {title: "Required For", field: "requiredFor"}
-                        ]}
-                        data={eventCategories === null ? [{}] : eventCategories.map(eventCategory => {
-                            return {
-                                name: eventCategory.name,
-                                penalty: eventCategory.penalty,
-                                requiredFor: eventCategory.requiredFor.map(e => e.name).join(", ")
-                            }
-                        })}/>
-                    <Button variant="contained" color="primary"
-                            onClick={(event) => setShowingAddCategoryDialog(true)}>Add Category</Button>
-                    <br/><i>Roles</i>
-                    <MaterialTable
-                        components={{Container: props => props.children}}
-                        options={{
-                            search: false,
-                            paging: false,
-                            showTitle: false,
-                            toolbar: false
-                        }}
-                        columns={[
-                            {title: "Role", field: "name"},
-                            {title: "Permissions", field: "permissions"},
-                            {title: "Actions", field: "actions"}
-                        ]}
-                        data={eventCategories === null ? [{}] : roles.map(role => {
-                            return {
-                                name: role.name,
-                                permissions: role.permissions.join(", "),
-                                actions: ""
-                            }
-                        })}/>
-                </Paper>
-            </Box>
-            <Dialog open={showingAddCategoryDialog} onClose={(event) => {
-                setShowingAddCategoryDialog(false)
-            }}>
-                <DialogTitle>New Event Category</DialogTitle>
-                <DialogContent>
-                    <Box>
+    const handleOpenNewRoleDialog = () => {
+        setShowingNewRoleDialog(true)
+    }
+
+    const handleCloseNewRoleDialog = () => {
+        setShowingNewRoleDialog(false)
+    }
+
+    const isCheckedForPermission = (permission) => {
+        return newRolePermissionsChecked.find(arrPerm => arrPerm === permission).checked
+    }
+
+    const handlePermissionCheck = (permission) => {
+        let newPermArray = newRolePermissionsChecked.slice()
+        newPermArray.find(arrPerm => arrPerm === permission)
+            .checked = !newRolePermissionsChecked.find(arrPerm => arrPerm === permission).checked
+        setNewRolePermissionsChecked(newPermArray)
+    }
+
+    const handleAddRole = () => {
+        const body = {
+            name: newRoleName,
+            permissions: newRolePermissionsChecked.filter(permission => permission.checked).map(permission => permission.permission)
+        }
+        axios.post("/api/v1/organization/" + orgId + "/roles/add", body).then(resp => {
+            console.log(resp)
+        }).catch(resp => {
+            console.log(resp)
+        })
+    }
+
+    if(categories === null || roles === null){
+        return(
+            <></>
+        )
+    }
+    else {
+        return (
+            <>
+                <Typography variant={"h6"}>Event Categories</Typography>
+                <Button color="primary" variant="contained" onClick={(event) => {handleOpenNewCategoryDialog()}}>Add Category</Button>
+                {categories.length < 1 ?
+                    <>
+                        <Typography>No categories to show.</Typography>
+                    </> :
+                    <>
+                        <Paper className={classes.peoplePaper}>
+                            <MaterialTable
+                                icons={tableIcons}
+                                options={{
+                                    showTitle: false
+                                }}
+                                columns={[
+                                    {title: "Name", field: "name"},
+                                    {title: "Penalty", field: "penalty"},
+                                    {title: "Required For", field: "requiredFor"}]}
+                                data={categories.map((category) => {
+                                    return {
+                                        name: category.name,
+                                        penalty: category.penalty,
+                                        requiredFor: (category.requiredForAll ? "Everyone" : category.requiredFor.length < 1 ? "None" :
+                                        category.requiredFor.map(role => {return role.name}).join(", "))
+                                    }
+                                })}/>
+                        </Paper>
+                    </>}
+
+                <Typography variant={"h6"}>Roles</Typography>
+                <Button color="primary" variant="contained" onClick={(event) => {handleOpenNewRoleDialog()}}>Add Role</Button>
+                {roles.length < 1 ?
+                    <>
+                        <Typography>No roles to show.</Typography>
+                    </> :
+                    <>
+                        <Paper className={classes.peoplePaper}>
+                            <MaterialTable
+                                icons={tableIcons}
+                                options={{
+                                    showTitle: false
+                                }}
+                                columns={[
+                                    {title: "Name", field: "name"},
+                                    {title: "Permissions", field: "permissions"}]}
+                                data={roles.map((role) => {
+                                    return {
+                                        name: role.name,
+                                        permissions: role.permissions.join(", ")
+                                    }
+                                })}/>
+                        </Paper>
+                    </>}
+
+                <Dialog open={showingNewCategoryDialog} onClose={(event) => {handleCloseNewCategoryDialog()}}>
+                    <DialogTitle>New Event Category</DialogTitle>
+                        <DialogContent>
+                            <TextField
+                                variant="filled"
+                                margin="dense"
+                                fullWidth
+                                id="newCategoryName"
+                                label="Category Name"
+                                onChange={(event) => setNewCategoryName(event.target.value)}/>
+                            <TextField
+                                variant="filled"
+                                margin="dense"
+                                fullWidth
+                                id="newCategoryPenalty"
+                                label="Category Penalty"
+                                onChange={(event) => setNewCategoryPenalty(parseInt(event.target.value))}/>
+                            <DialogContentText>Require For Everyone:</DialogContentText>
+                            <RadioGroup value={newCategoryRequiredForAll}>
+                                <FormControlLabel value={true} control={<Radio onClick = {(event) => setNewCategoryRequiredForAll(true)}/>} label="Yes"/>
+                                <FormControlLabel value={false} control={<Radio onClick = {(event) => setNewCategoryRequiredForAll(false)}/>} label="No"/>
+                            </RadioGroup>
+                            <DialogContentText>Required Roles:</DialogContentText>
+                            {newCategoryRequiredForChecked.map((role) => (
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={isCheckedForRole(role)}
+                                            onChange={(event) => {
+                                                handleRoleCheck(role)
+                                            }}/>
+                                    }
+                                    label={role.name}
+                                />
+                            ))}
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={(event) => {handleCloseNewCategoryDialog()}} color="primary">Cancel</Button>
+                            <Button onClick={(event) => {handleAddEventCategory()}} color="primary">Save</Button>
+                        </DialogActions>
+                </Dialog>
+                <Dialog open={showingNewRoleDialog} onClose={(event) => {handleCloseNewRoleDialog()}}>
+                    <DialogTitle>New Role</DialogTitle>
+                    <DialogContent>
                         <TextField
                             variant="filled"
                             margin="dense"
-                            id="addCategoryName"
-                            label="Name"
-                            value={addCategoryName}
-                            onChange={(event) => {
-                                setAddCategoryName(event.target.value)
-                            }}/>
-                    </Box>
-                    <Box>
-                        <TextField
-                            variant="filled"
-                            margin="dense"
-                            id="addCategoryPenalty"
-                            label="Penalty"
-                            type="number"
-                            value={addCategoryPenalty}
-                            onChange={(event) => {
-                                setAddCategoryPenalty(event.target.value)
-                            }}/>
-                    </Box>
-                    <Box>
-                        Required for:<br/>
-                        {roles.map((role) => (
+                            fullWidth
+                            id="newRoleName"
+                            label="Role Name"
+                            onChange={(event) => setNewRoleName(event.target.value)}/>
+                        <DialogContentText>Permissions:</DialogContentText>
+                        {newRolePermissionsChecked.map(permission => (
                             <FormControlLabel
                                 control={
                                     <Checkbox
-                                        checked={isCheckedForRole(role)}
-                                        onChange={(event) => {
-                                            handleRequiredForCheck(role)
-                                        }}/>
+                                        checked={isCheckedForPermission(permission)}
+                                        onChange={(event) => {handlePermissionCheck(permission)}}
+                                        />
                                 }
-                                label={role.name}
-                            />
+                                label={permission.label}/>
                         ))}
-                    </Box>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={(event) => {setShowingAddCategoryDialog(false)}} color="primary">Cancel</Button>
-                    <Button onClick={(event) => {handleAddCategory()}} color="primary">Add</Button>
-                </DialogActions>
-            </Dialog>
-        </>
-    )
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={(event) => {handleCloseNewRoleDialog()}} color="primary">Cancel</Button>
+                        <Button onClick={(event) => {handleAddRole()}} color="primary">Save</Button>
+                    </DialogActions>
+                </Dialog>
+            </>
+        )
+    }
 }

@@ -157,14 +157,16 @@ export default function EventDisplay(props) {
 
     const handleOpenAttendanceDialog = (ev) => {
         setAttendanceEvent(ev)
+        let newAttendanceChecked = []
         ev.attended.forEach((user) => {
             user.checked = true
-            attendanceChecked.push(user)
+            newAttendanceChecked.push(user)
         })
         ev.notAttended.forEach((user) => {
             user.checked = false
-            attendanceChecked.push(user)
+            newAttendanceChecked.push(user)
         })
+        setAttendanceChecked(newAttendanceChecked)
         setShowingAttendanceDialog(true)
     }
 
@@ -348,7 +350,7 @@ export default function EventDisplay(props) {
                                         margin="dense"
                                         id="secret"
                                         label="Secret"
-                                        onCheck={(event) => setSignInSecret(event.target.value)}/>
+                                        onChange={(event) => setSignInSecret(event.target.value)}/>
                                 </DialogContent>
                                 <DialogActions>
                                     <Button onClick={(event) => {handleCloseSignInDialog()}} color="primary">Cancel</Button>
