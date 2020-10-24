@@ -28,6 +28,11 @@ import TextField from "@material-ui/core/TextField";
 import DialogActions from "@material-ui/core/DialogActions";
 import Checkbox from "@material-ui/core/Checkbox";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
+import {KeyboardDatePicker, KeyboardDateTimePicker} from "@material-ui/pickers";
+import FormControl from "@material-ui/core/FormControl";
+import InputLabel from "@material-ui/core/InputLabel";
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
 
 const axios = require('axios')
 
@@ -74,6 +79,13 @@ export default function EventDisplay(props) {
     const[showingAttendanceDialog, setShowingAttendanceDialog] = useState(false)
     const[attendanceEvent, setAttendanceEvent] = useState({name: "", attended: [], notAttended: []})
     const[attendanceChecked, setAttendanceChecked] = useState([])
+    const[showingSubmitEventDialog, setShowingSubmitEventDialog] = useState(false)
+    const[newEventName, setNewEventName] = useState("")
+    const[newEventValue, setNewEventValue] = useState(0)
+    const[newEventStartTime, setNewEventStartTime] = useState(null)
+    const[newEventCloseTime, setNewEventCloseTime] = useState(null)
+    const[newEventCategoryId, setNewEventCategoryId] = useState(null)
+    const[eventCategories, setEventCategories] = useState([])
 
     useEffect(() => {
         axios.get("/api/v1/organization/" + orgId + "/events/open").then(resp => {
@@ -215,6 +227,34 @@ export default function EventDisplay(props) {
         })
     }
 
+    const handleOpenSubmitEventDialog = () => {
+        axios.get("/api/v1/organization/" + orgId + "/categories").then(resp => {
+            setEventCategories(resp.data)
+        }).catch(resp => {
+            setEventCategories([])
+        })
+        setShowingSubmitEventDialog(true)
+    }
+
+    const handleCloseSubmitEventDialog = () => {
+        setShowingSubmitEventDialog(false)
+    }
+
+    const handleSubmitEvent = () => {
+        const body = {
+            name: newEventName,
+            value: newEventValue,
+            startTime: newEventStartTime,
+            closeTime: newEventCloseTime,
+            categoryId: newEventCategoryId
+        }
+        axios.post("/api/v1/organization/" + orgId + "/events/add", body).then(resp => {
+            console.log(resp)
+        }).catch(resp => {
+            console.log(resp)
+        })
+    }
+
     if(openEvents === null || upcomingEvents === null || pastEvents === null){
         return(
             <></>
@@ -223,6 +263,8 @@ export default function EventDisplay(props) {
     else {
         return (
             <>
+                {props.selfRole.permissions.includes("SUPERADMIN") || props.selfRole.permissions.includes("canManageEvents") || props.selfRole.permissions.includes("canSubmitEvents") ?
+                    <Button color="primary" variant="contained" onClick={(event) => {handleOpenSubmitEventDialog()}}>Submit Event</Button> : <></>}
                 <Typography variant={"h6"}>Open Events</Typography>
                 {openEvents.length < 1 ?
                     <>
@@ -393,6 +435,64 @@ export default function EventDisplay(props) {
                             </>:
                             <>
                             </>}
+                    </Dialog>
+                    <Dialog open={showingSubmitEventDialog} onClose={(event) => {handleCloseSubmitEventDialog()}}>
+                        <DialogTitle>Submit New Event</DialogTitle>
+                        <DialogContent>
+                            <TextField
+                                variant="filled"
+                                margin="dense"
+                                fullWidth
+                                id="newEventName"
+                                label="Event Name"
+                                onChange={(event) => setNewEventName(event.target.value)}/>
+                            <TextField
+                                variant="filled"
+                                margin="dense"
+                                fullWidth
+                                id="newEventValue"
+                                label="Event Value"
+                                onChange={(event) => setNewEventValue(parseInt(event.target.value))}/>
+                            <KeyboardDateTimePicker
+                                disableFuture
+                                openTo="year"
+                                inputVariant="filled"
+                                format="MM/dd/yyyy hh:mm a"
+                                placeholder="__/__/____ __:__ AM/PM"
+                                label="Start Time"
+                                views={["year", "month", "date", "hours", "minutes"]}
+                                value={newEventStartTime}
+                                onChange={setNewEventStartTime}
+                            />
+                            <KeyboardDateTimePicker
+                                disableFuture
+                                openTo="year"
+                                inputVariant="filled"
+                                format="MM/dd/yyyy hh:mm a"
+                                placeholder="__/__/____ __:__ AM/PM"
+                                label="Close Time"
+                                views={["year", "month", "date", "hours", "minutes"]}
+                                value={newEventCloseTime}
+                                onChange={setNewEventCloseTime}
+                            />
+                            <FormControl fullWidth variant="filled">
+                                <InputLabel id="newEventCategoryLabel">Category</InputLabel>
+                                <Select
+                                    labelId="demo-simple-select-filled-label"
+                                    id="demo-simple-select-filled"
+                                    value={newEventCategoryId}
+                                    onChange={(event) => {setNewEventCategoryId(event.target.value)}}
+                                >
+                                    {eventCategories.map(category => {
+                                        return <MenuItem value={category.id}>{category.name}</MenuItem>
+                                    })}
+                                </Select>
+                            </FormControl>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={(event) => {handleCloseSubmitEventDialog()}} color="primary">Cancel</Button>
+                            <Button onClick={(event) => {handleSubmitEvent()}} color="primary">Submit</Button>
+                        </DialogActions>
                     </Dialog>
             </>
         )
