@@ -222,6 +222,7 @@ export default function EventDisplay(props) {
         }
         axios.post("/api/v1/organization/" + orgId + "/events/" + attendanceEvent.id + "/edit-attendance", body).then(resp => {
             console.log(resp)
+            handleCloseAttendanceDialog()
         }).catch(resp => {
             console.log(resp)
         })
@@ -237,6 +238,11 @@ export default function EventDisplay(props) {
     }
 
     const handleCloseSubmitEventDialog = () => {
+        setNewEventName("")
+        setNewEventValue(0)
+        setNewEventStartTime(null)
+        setNewEventCloseTime(null)
+        setNewEventCategoryId(null)
         setShowingSubmitEventDialog(false)
     }
 
@@ -250,6 +256,8 @@ export default function EventDisplay(props) {
         }
         axios.post("/api/v1/organization/" + orgId + "/events/add", body).then(resp => {
             console.log(resp)
+
+            handleCloseSubmitEventDialog()
         }).catch(resp => {
             console.log(resp)
         })

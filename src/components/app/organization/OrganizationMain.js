@@ -101,7 +101,6 @@ export default function OrganizationMain(props) {
                     <Tabs>
                         <Tab label="People" onClick={(event) => {history.push("/app/organization/" + orgId + "/people")}}/>
                         <Tab label="Events" onClick={(event) => {history.push("/app/organization/" + orgId + "/events")}}/>
-                        <Tab label="Sign In" onClick={(event) => {history.push("/app/organization/" + orgId + "/sign-in")}}/>
                         <Tab label="Voting" onClick={(event) => {history.push("/app/organization/" + orgId + "/voting")}}/>
                         {selfRole.permissions.includes("SUPERADMIN") ? <Tab label="Settings" onClick={(event) => {history.push("/app/organization/" + orgId + "/settings")}}/> : <></>}
                     </Tabs>
@@ -116,9 +115,6 @@ export default function OrganizationMain(props) {
                         </Route>
                         <Route exact path="/app/organization/:orgId/events">
                             <EventDisplay selfRole = {selfRole}/>
-                        </Route>
-                        <Route exact path="/app/organization/:orgId/sign-in">
-
                         </Route>
                         <Route exact path="/app/organization/:orgId/voting">
                             <VotingDisplay selfRole = {selfRole}/>

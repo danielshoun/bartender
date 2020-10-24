@@ -29,6 +29,8 @@ import FormControl from "@material-ui/core/FormControl";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import Button from "@material-ui/core/Button";
+import Switch from "@material-ui/core/Switch";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
 
 const axios = require('axios')
 
@@ -69,6 +71,7 @@ export default function PeopleDisplay(props) {
 
     const [eventCategories, setEventCategories] = useState(null)
     const [userBarDetails, setUserBarDetails] = useState(null)
+    const [usingPenalties, setUsingPenalties] = useState(false)
     const [unapprovedUsers, setUnapprovedUsers] = useState(null)
     const [showingEditUserDialog, setShowingEditUserDialog] = useState(false)
     const [roles, setRoles] = useState([])
@@ -153,6 +156,34 @@ export default function PeopleDisplay(props) {
         })
     }
 
+    const handleApplyPenalties = () => {
+        let newBarDetails = userBarDetails.slice()
+        if (!usingPenalties) {
+            newBarDetails.forEach(barDetails => {
+                barDetails.flags.forEach(flag => {
+                    if (!flag.category.requiredForAll && flag.category.requiredFor.length < 1) {
+                        if (!flag.completed) {
+                            barDetails.score -= flag.category.penalty
+                        }
+                    }
+                })
+            })
+        }
+        else {
+            newBarDetails.forEach(barDetails => {
+                barDetails.flags.forEach(flag => {
+                    if (!flag.category.requiredForAll && flag.category.requiredFor.length < 1) {
+                        if (!flag.completed) {
+                            barDetails.score += flag.category.penalty
+                        }
+                    }
+                })
+            })
+        }
+        setUsingPenalties(!usingPenalties)
+        setUserBarDetails(newBarDetails)
+    }
+
     if (eventCategories === null || userBarDetails === null || unapprovedUsers === null) {
         return (
             <>
@@ -167,12 +198,10 @@ export default function PeopleDisplay(props) {
                 <Paper className={classes.peoplePaper}>
                     <MaterialTable
                         icons={tableIcons}
-                        options={{
-                            showTitle: false
-                        }}
+                        title={<FormControlLabel label="Penalties" control={<Switch checked={usingPenalties} onChange={(event) => {handleApplyPenalties()}}/>}/>}
                         columns={eventCategories.length > 0 ? [
                             {title: "Name", field: "name"},
-                            {title: "Bar", field: "score"}
+                            {title: "Bar", field: "score", customSort: (x, y) => parseInt(x.score) - parseInt(y.score), defaultSort: "desc"}
                         ].concat(eventCategories.map((category) => {
                             return category.requiredFor.length === 0 && !category.requiredForAll ? {title: category.name, field: category.name} : null
                         }).filter(function(val) {return val !== null})) : [{title: "Name", field: "name"}]}
