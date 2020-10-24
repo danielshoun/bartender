@@ -20,6 +20,15 @@ import ArrowDownward from "@material-ui/icons/ArrowDownward";
 import Remove from "@material-ui/icons/Remove";
 import ViewColumn from "@material-ui/icons/ViewColumn";
 import Box from "@material-ui/core/Box";
+import Dialog from "@material-ui/core/Dialog";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import InputLabel from "@material-ui/core/InputLabel";
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
+import FormControl from "@material-ui/core/FormControl";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogActions from "@material-ui/core/DialogActions";
+import Button from "@material-ui/core/Button";
 
 const axios = require('axios')
 
@@ -61,6 +70,10 @@ export default function PeopleDisplay(props) {
     const [eventCategories, setEventCategories] = useState(null)
     const [userBarDetails, setUserBarDetails] = useState(null)
     const [unapprovedUsers, setUnapprovedUsers] = useState(null)
+    const [showingEditUserDialog, setShowingEditUserDialog] = useState(false)
+    const [roles, setRoles] = useState([])
+    const [editingUser, setEditingUser] = useState("")
+    const [editingUserRole, setEditingUserRole] = useState(null)
 
     useEffect( () => {
         axios.get("/api/v1/organization/" + orgId + "/categories").then(resp => {
@@ -113,6 +126,33 @@ export default function PeopleDisplay(props) {
         })
     }
 
+    const handleOpenEditUserDialog = (user) => {
+        axios.get("/api/v1/organization/" + orgId + "/roles").then(resp => {
+            console.log(resp)
+            setRoles(resp.data)
+        }).catch(resp => {
+            console.log(resp)
+            setRoles([])
+        })
+        setEditingUser(user)
+        setShowingEditUserDialog(true)
+    }
+
+    const handleCloseEditUserDialog = () => {
+        setShowingEditUserDialog(false)
+    }
+
+    const handleEditUser = () => {
+        const body = {
+            userIds: [editingUser.id]
+        }
+        axios.post("/api/v1/organization/" + orgId + "/roles/" + editingUserRole + "/give", body).then(resp => {
+            console.log(resp)
+        }).catch(resp => {
+            console.log(resp)
+        })
+    }
+
     if (eventCategories === null || userBarDetails === null || unapprovedUsers === null) {
         return (
             <>
@@ -138,7 +178,8 @@ export default function PeopleDisplay(props) {
                         }).filter(function(val) {return val !== null})) : [{title: "Name", field: "name"}]}
                         data={userBarDetails.map((barDetails) => {
                             let data = {
-                                name: barDetails.user.firstName + " " + barDetails.user.lastName,
+                                name: <>{barDetails.user.firstName + " " + barDetails.user.lastName}
+                                        {props.selfRole.permissions.includes("SUPERADMIN") ? <Edit onClick={(event) => {handleOpenEditUserDialog(barDetails.user)}}/> : <></>}</>,
                                 score: barDetails.score
                             }
 
@@ -187,6 +228,28 @@ export default function PeopleDisplay(props) {
                         </>}
 
                 </Box>: <></>}
+                <Dialog open={showingEditUserDialog} onClose={(event) => {handleCloseEditUserDialog()}}>
+                    <DialogTitle>Editing {editingUser.firstName + " " + editingUser.lastName}</DialogTitle>
+                    <DialogContent>
+                        <FormControl fullWidth variant="filled">
+                            <InputLabel id="editingUserRole">Role</InputLabel>
+                            <Select
+                                labelId="demo-simple-select-filled-label"
+                                id="demo-simple-select-filled"
+                                value={editingUserRole}
+                                onChange={(event) => {setEditingUserRole(event.target.value)}}
+                            >
+                                {roles.map(role => {
+                                    return <MenuItem value={role.id}>{role.name}</MenuItem>
+                                })}
+                            </Select>
+                        </FormControl>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={(event) => {handleCloseEditUserDialog()}} color="primary">Cancel</Button>
+                        <Button onClick={(event) => {handleEditUser()}} color="primary">Save</Button>
+                    </DialogActions>
+                </Dialog>
             </>
         )
     }

@@ -64,16 +64,16 @@ export default function OrgSettings(props) {
     const classes = useStyles()
     const {orgId} = useParams()
 
-    const[categories, setCategories] = useState(null)
-    const[roles, setRoles] = useState(null)
-    const[showingNewCategoryDialog, setShowingNewCategoryDialog] = useState(false)
-    const[newCategoryName, setNewCategoryName] = useState("")
-    const[newCategoryPenalty, setNewCategoryPenalty] = useState(0)
-    const[newCategoryRequiredForAll, setNewCategoryRequiredForAll] = useState(false)
-    const[newCategoryRequiredForChecked, setNewCategoryRequiredForChecked] = useState([])
-    const[showingNewRoleDialog, setShowingNewRoleDialog] = useState(false)
-    const[newRoleName, setNewRoleName] = useState("")
-    const[newRolePermissionsChecked, setNewRolePermissionsChecked] = useState([
+    const [categories, setCategories] = useState(null)
+    const [roles, setRoles] = useState(null)
+    const [showingNewCategoryDialog, setShowingNewCategoryDialog] = useState(false)
+    const [newCategoryName, setNewCategoryName] = useState("")
+    const [newCategoryPenalty, setNewCategoryPenalty] = useState(0)
+    const [newCategoryRequiredForAll, setNewCategoryRequiredForAll] = useState(false)
+    const [newCategoryRequiredForChecked, setNewCategoryRequiredForChecked] = useState([])
+    const [showingNewRoleDialog, setShowingNewRoleDialog] = useState(false)
+    const [newRoleName, setNewRoleName] = useState("")
+    const [newRolePermissionsChecked, setNewRolePermissionsChecked] = useState([
         {permission: "canManageEvents", label: "Manage Events", checked: false}
         ])
 

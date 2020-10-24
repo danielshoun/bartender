@@ -67,25 +67,25 @@ export default function EventDisplay(props) {
     const classes = useStyles()
     const {orgId} = useParams()
 
-    const[openEvents, setOpenEvents] = useState(null)
-    const[upcomingEvents, setUpcomingEvents] = useState(null)
-    const[pastEvents, setPastEvents] = useState(null)
-    const[showingSignInDialog, setShowingSignInDialog] = useState(false)
-    const[signInEvent, setSignInEvent] = useState("")
-    const[signInSecret, setSignInSecret] = useState("")
-    const[signInSuccess, setSignInSuccess] = useState(false)
-    const[signInError, setSignInError] = useState(false)
-    const[signInErrorText, setSignInErrorText] = useState("")
-    const[showingAttendanceDialog, setShowingAttendanceDialog] = useState(false)
-    const[attendanceEvent, setAttendanceEvent] = useState({name: "", attended: [], notAttended: []})
-    const[attendanceChecked, setAttendanceChecked] = useState([])
-    const[showingSubmitEventDialog, setShowingSubmitEventDialog] = useState(false)
-    const[newEventName, setNewEventName] = useState("")
-    const[newEventValue, setNewEventValue] = useState(0)
-    const[newEventStartTime, setNewEventStartTime] = useState(null)
-    const[newEventCloseTime, setNewEventCloseTime] = useState(null)
-    const[newEventCategoryId, setNewEventCategoryId] = useState(null)
-    const[eventCategories, setEventCategories] = useState([])
+    const [openEvents, setOpenEvents] = useState(null)
+    const [upcomingEvents, setUpcomingEvents] = useState(null)
+    const [pastEvents, setPastEvents] = useState(null)
+    const [showingSignInDialog, setShowingSignInDialog] = useState(false)
+    const [signInEvent, setSignInEvent] = useState("")
+    const [signInSecret, setSignInSecret] = useState("")
+    const [signInSuccess, setSignInSuccess] = useState(false)
+    const [signInError, setSignInError] = useState(false)
+    const [signInErrorText, setSignInErrorText] = useState("")
+    const [showingAttendanceDialog, setShowingAttendanceDialog] = useState(false)
+    const [attendanceEvent, setAttendanceEvent] = useState({name: "", attended: [], notAttended: []})
+    const [attendanceChecked, setAttendanceChecked] = useState([])
+    const [showingSubmitEventDialog, setShowingSubmitEventDialog] = useState(false)
+    const [newEventName, setNewEventName] = useState("")
+    const [newEventValue, setNewEventValue] = useState(0)
+    const [newEventStartTime, setNewEventStartTime] = useState(null)
+    const [newEventCloseTime, setNewEventCloseTime] = useState(null)
+    const [newEventCategoryId, setNewEventCategoryId] = useState(null)
+    const [eventCategories, setEventCategories] = useState([])
 
     useEffect(() => {
         axios.get("/api/v1/organization/" + orgId + "/events/open").then(resp => {
@@ -282,7 +282,7 @@ export default function EventDisplay(props) {
                                     {title: "Category", field: "category"},
                                     {title: "Points", field: "points"},
                                     {title: "Close Time", field: "closeTime", defaultSort: "asc"}].concat(
-                                    props.selfRole.permissions.includes("SUPERADMIN") || props.selfRole.permissions.includes("canManangeEvents")? [{title: "Secret", field: "secret"}]:[]
+                                    props.selfRole.permissions.includes("SUPERADMIN") || props.selfRole.permissions.includes("canManageEvents")? [{title: "Secret", field: "secret"}]:[]
                                 ).concat([{title: "Actions", field: "actions"}])}
                                 data={openEvents.map((ev) => {
                                     return {
@@ -314,7 +314,7 @@ export default function EventDisplay(props) {
                                         {title: "Points", field: "points"},
                                         {title: "Start Time", field: "startTime", defaultSort: "asc"},
                                         {title: "Approved", field: "approved"}].concat(
-                                        props.selfRole.permissions.includes("SUPERADMIN") || props.selfRole.permissions.includes("canManangeEvents")? [{title: "Secret", field: "secret"}, {title: "Actions", field: "actions"}]:[]
+                                        props.selfRole.permissions.includes("SUPERADMIN") || props.selfRole.permissions.includes("canManageEvents")? [{title: "Secret", field: "secret"}, {title: "Actions", field: "actions"}]:[]
                                     )}
                                     data={upcomingEvents.map((ev) => {
                                         return {
@@ -349,7 +349,7 @@ export default function EventDisplay(props) {
                                     {title: "Points", field: "points"},
                                     {title: "Start Time", field: "startTime", defaultSort: "desc"},
                                     {title: "Close Time", field: "closeTime"}].concat(
-                                    props.selfRole.permissions.includes("SUPERADMIN") || props.selfRole.permissions.includes("canManangeEvents")? [{title: "Actions", field: "actions"}]:[]
+                                    props.selfRole.permissions.includes("SUPERADMIN") || props.selfRole.permissions.includes("canManageEvents")? [{title: "Actions", field: "actions"}]:[]
                                 )}
                                 data={pastEvents.map((ev) => {
                                     return {
@@ -402,7 +402,7 @@ export default function EventDisplay(props) {
                     </Dialog>
                     <Dialog open={showingAttendanceDialog} onClose={(event) => {handleCloseAttendanceDialog()}}>
                         <DialogTitle>{attendanceEvent.name}</DialogTitle>
-                        {props.selfRole.permissions.includes("SUPERADMIN") || props.selfRole.permissions.includes("canManangeEvents")?
+                        {props.selfRole.permissions.includes("SUPERADMIN") || props.selfRole.permissions.includes("canManageEvents")?
                             <>
                                 <DialogContent>
                                     {attendanceEvent.attended.concat(attendanceEvent.notAttended).sort(function(x, y) {
