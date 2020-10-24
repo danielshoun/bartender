@@ -134,7 +134,7 @@ export default function PeopleDisplay(props) {
                             {title: "Name", field: "name"},
                             {title: "Bar", field: "score"}
                         ].concat(eventCategories.map((category) => {
-                            return category.requiredFor.length === 0 ? {title: category.name, field: category.name} : null
+                            return category.requiredFor.length === 0 && !category.requiredForAll ? {title: category.name, field: category.name} : null
                         }).filter(function(val) {return val !== null})) : [{title: "Name", field: "name"}]}
                         data={userBarDetails.map((barDetails) => {
                             let data = {
