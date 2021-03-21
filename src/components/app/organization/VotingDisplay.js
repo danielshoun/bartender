@@ -211,7 +211,7 @@ export default function VotingDisplay(props) {
 
     const handleOpenResultDialog = (poll) => {
         setResultPoll(poll)
-        axios.get("/api/v1/organization/" + orgId + "/poll/" + poll.id + "/winner").then(resp => {
+        axios.get("/api/v1/organization/" + orgId + "/poll/" + poll.id + "/results").then(resp => {
             console.log(resp)
             setResultPollWinner(resp.data)
             setShowingResultDialog(true)
