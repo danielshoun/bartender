@@ -418,9 +418,9 @@ export default function VotingDisplay(props) {
                 <Dialog open={showingResultDialog} onClose={(event) => handleCloseResultDialog()}>
                     <DialogTitle>{resultPoll.question}</DialogTitle>
                     <DialogContent>
-                        Winner(s):<br/><br/>{
+                        Results:<br/><br/>{
                         resultPollWinner.map((choice) => {
-                            return <>{choice.text}<br/></>
+                            return <>{choice.text}: {choice.total} votes<br/></>
                     })}
                     </DialogContent>
                     <DialogActions>
