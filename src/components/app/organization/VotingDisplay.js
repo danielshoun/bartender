@@ -233,6 +233,7 @@ export default function VotingDisplay(props) {
         )
     }
     else {
+        console.log(resultPollWinner);
         return (
             <>
                 <Grid container direction="row" className={classes.votingHeaderGrid}>
@@ -417,7 +418,8 @@ export default function VotingDisplay(props) {
                 <Dialog open={showingResultDialog} onClose={(event) => handleCloseResultDialog()}>
                     <DialogTitle>{resultPoll.question}</DialogTitle>
                     <DialogContent>
-                        Winner(s):<br/><br/>{resultPollWinner.map((choice) => {
+                        Winner(s):<br/><br/>{
+                        resultPollWinner.map((choice) => {
                             return <>{choice.text}<br/></>
                     })}
                     </DialogContent>
